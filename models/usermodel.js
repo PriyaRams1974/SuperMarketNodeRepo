@@ -28,6 +28,11 @@ const userSchema = new mongoose.Schema({
     timestamps: true
 });
 
+//Date and time in uuid
+var timestamp = new Date();
+var date = timestamp.getFullYear()+''+(timestamp.getMonth()+1)+''+timestamp.getDate();
+var time = timestamp.getHours()+''+timestamp.getMinutes()+''+timestamp.getSeconds();
+
 function time(){
     let date = new Date();
     let month=  date.getMonth()+1;

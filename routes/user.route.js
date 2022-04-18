@@ -4,14 +4,26 @@ const jwt = require('jsonwebtoken');
 const moment = require('moment');
 // imported schema
 const userSchema = require('../models/usermodel');
+const {authSchema} = require('../models/joiValidation.js');
+
 
 router.post('/signUp', async(req,res)=>{
     try {
+        const resultBody = await authSchema.validateAsync(req.body)       
+        console.log("result.......",resultBody);
         const username = req.body.username;
         const email = req.body.email;
         const mobileNumber = req.body.mobileNumber;
         
         if(username){
+
+            if(username.search(/\d/)==-1){
+                return res.json({status:"Failure",message:'username must contain atleast one number'})
+        }else if(username.search(/^[A-Za-z0-9]+$/)){
+                return res.json({status:"Failure",message:'username must not contain any special character'})
+        }else if(username.search(/[a-zA-Z]/)==-1){
+                return res.json({status:"Failure",message:'username must contain atleast one alphabet character'})
+            }
             let usernameDetail = await userSchema.findOne({'username': username}).exec()
             if(usernameDetail){
                 return res.json({status: "failure", message: 'username already exist'})
