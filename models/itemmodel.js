@@ -8,7 +8,7 @@ const itemSchema = new mongoose.Schema({
     price:{type: String, required: true},
     brand:{type: String, required: true},
     incredients: {type: String, required: false},
-    expireDate:{type: String, required: true, trim: true},
+    expireDate:{type: Date, required: true, trim: true},
     itemImage: {type: String, required: true},
     inStock: {type: Boolean, required: false, default: true},
     userUuid: {type: String, required: true},//user relation

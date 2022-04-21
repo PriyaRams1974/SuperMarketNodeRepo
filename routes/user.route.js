@@ -5,6 +5,8 @@ const moment = require('moment');
 // imported schema
 const userSchema = require('../models/usermodel');
 const {authSchema} = require('../models/joiValidation.js');
+const MailSending = require('../middleware/email.js');
+require('dotenv').config();
 
 
 router.post('/signUp', async(req,res)=>{
@@ -125,29 +127,6 @@ router.post("/logout/:uuid", async(req,res)=>{
     }
     return input;
   };
-//   const date = new Date();
-
-//   // Data about date
-//   const format = {
-//     dd: formatData(date.getDate()),
-//     mm: formatData(date.getMonth() + 1),
-//     yyyy: date.getFullYear(),
-//     HH: formatData(date.getHours()),
-//     hh: formatData(formatHour(date.getHours())),
-//     MM: formatData(date.getMinutes()),
-//     SS: formatData(date.getSeconds()),
-//   };
-//   const format24Hour = ({ dd, mm, yyyy, HH, MM, SS }) => {
-//     console.log(`${mm}/${dd}/${yyyy} ${HH}:${MM}:${SS}`);
-//   };
-//   const format12Hour = ({ dd, mm, yyyy, hh, MM, SS }) => {
-//     console.log(`${mm}/${dd}/${yyyy} ${hh}:${MM}:${SS}`);
-//   };
-    
-//   // Time in 24 Hour format
-//   format24Hour(format);
-//   // Time in 12 Hour format
-//   format12Hour(format);
 
 let date = new Date();
 let month=  date.getMonth()+1;
@@ -213,5 +192,23 @@ router.put('/resetpassword', async(req,res)=>{
     }
 })
 
+router.post("/mailSendingApi", async(req, res)=>{
+    try {
+        const toMail = req.body.toMail;
+        const subject = req.body.subject;
+        const text = req.body.text;
+        const mailData = {
+            from: process.env.EMAIL,
+            to: toMail,
+            subject: subject,
+            text: text
+        }
+        let data = await MailSending.mailSending(mailData)
+         return res.status(200).json({status: "success", message: "Mail sent successfully"})
+          
+    }catch(err){
+        res.json({status:'failure',message:err.message})
+    }
+})
 
 module.exports = router;
