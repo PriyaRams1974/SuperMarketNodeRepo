@@ -6,6 +6,8 @@ const moment = require('moment');
 const userSchema = require('../models/usermodel');
 const {authSchema} = require('../models/joiValidation.js');
 const MailSending = require('../middleware/email.js');
+const {join} = require('path')
+
 require('dotenv').config();
 
 
@@ -210,5 +212,65 @@ router.post("/mailSendingApi", async(req, res)=>{
         res.json({status:'failure',message:err.message})
     }
 })
+router.post("/mailSendingHtmlApi", async(req, res)=>{
+    try {
+        let link = "https://w3schools.com/html"
+        const toMail = req.body.toMail;
+        const subject = req.body.subject;
+        const text = req.body.text;
+        const mailData = {
+            from: process.env.EMAIL,
+            to: toMail,
+            subject: subject,
+            // text: text
+            // html: `<h1>This is a Heading</h1><p>This is a Paragraph</p><p>Click here ${link}`
+            html: `<h1>This is a Heading</h1><p>This is a Paragraph</p><a href= ${link}>Click here</a><p>Thank you</p>`
+
+        }
+        let data = await MailSending.mailSending(mailData)
+         return res.status(200).json({status: "success", message: "Mail sent successfully"})
+          
+    }catch(err){
+        res.json({status:'failure',message:err.message})
+    }
+})
+
+router.post("/mailSendingEJSApi", async(req, res)=>{
+    try {
+        let link = "https://w3schools.com/html"
+        const toMail = req.body.toMail;
+        const subject = req.body.subject;
+        // const text = req.body.text;
+        const mailData = {
+            from: process.env.EMAIL,
+            to: toMail,
+            subject: subject,
+            // text: text
+            // html: `<h1>This is a Heading</h1><p>This is a Paragraph</p><p>Click here ${link}`
+            fileName: 'SampleEjs.ejs',
+            attachments:[
+                {
+                    filename: 'sample_pdf.pdf',
+                    filePath:"/Users/platosystechnologies/Downloads/sample_pdf.pdf"                    
+                }
+            ],
+            details:{
+                title: "APPLICATION FORM",
+                date: new Date(),
+                link: "https://www.w3schools.com/html/tryit.asp?filename=tryhtml_default"
+            }
+        }
+        await MailSending.mailEjsSending(mailData).then(data=>{
+            return res.status(200).json({status: "success", message: "Mail sent successfully"}) 
+        }).catch((error)=>{
+            return res.status(400).json({status: "failure", message: "Mail sent failed"})
+        })
+    } catch (error) {
+        console.log(error.message)
+        return res.status(500).json({status: "failure", message: error.message})
+    }
+})
+
+
 
 module.exports = router;

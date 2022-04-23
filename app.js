@@ -3,7 +3,6 @@ const cors = require('cors');
 const mongoose = require('mongoose')
 require('dotenv').config()
 const port = process.env.PORT || 8000;
-
 const itemRouter = require('./routes/item.route');
 const userRouter = require('./routes/user.route');
 const categoryRouter = require('./routes/category.route');
@@ -28,6 +27,7 @@ mongoose.connect(process.env.dbUrl, {
 })
 
 app.use(express.json());
+app.set('view engine', 'ejs')
 // router connection
 app.use('/api/v1/item/', itemRouter);
 app.use('/api/v2/users/', userRouter);
