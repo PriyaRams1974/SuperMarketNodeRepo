@@ -24,6 +24,8 @@ const transporter = nodemailer.createTransport({
 
 
 async function mailSending(mailData){
+    console.log("mailSending",mailData)
+
     try{
     transporter.sendMail(mailData,(err,data)=>{
         if(err)
@@ -39,6 +41,7 @@ async function mailSending(mailData){
 }
 
 async function mailEjsSending(mailData){
+
     try {
         console.log(mailData.attachments)
         const data = await ejs.renderFile(join(__dirname,'../templates/', mailData.fileName), mailData, mailData.details)

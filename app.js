@@ -6,7 +6,7 @@ const port = process.env.PORT || 8000;
 const itemRouter = require('./routes/item.route');
 const userRouter = require('./routes/user.route');
 const categoryRouter = require('./routes/category.route');
-
+import {mailService} from "./routes/user.route"
 
 const app = express();
 app.use(cors());
