@@ -64,12 +64,28 @@ require('dotenv').config();
             console.log(user.password);
         }
         var result = await user.save();
-        const emailDetail = {
-            useruuid: user.uuid,
-            useremail: user.email,
-            subject:"VERIFY EMAIL"
+        // const emailDetail = {
+        //     useruuid: user.uuid,
+        //     useremail: user.email,
+        //     subject:"VERIFY EMAIL"
+        // }
+        // let link = `http://192.168.1.26:7070/api/v2/users/VerifiedUserApi?uuid=${user.uuid}`
+        let link = `http://127.0.0.1:7070/api/v2/users/VerifiedUserApi?uuid=${user.uuid}`
+
+        const toMail = user.email;
+        const subject = "Account Activation Link";
+        const mailData = {
+            from: process.env.EMAIL,
+            to: toMail,
+            subject: subject,
+            // text: text
+            // html: `<h1>This is a Heading</h1><p>This is a Paragraph</p><p>Click here ${link}`
+            html: `<h1>This is a Heading</h1><p>This is a Paragraph</p><a href= ${link}>Click here</a><p>Thank you</p>`
+
         }
-        await mailService(emailDetail)
+        let data = await MailSending.mailSending(mailData)
+        console.log("MAIL RESPONSE ",data)
+        // await mailService(emailDetail)
         return res.status(200).json({status: "success", message: "user details added successfully", data: result})    
     } catch (error) {
         console.log(error.message)
@@ -78,7 +94,9 @@ require('dotenv').config();
 });
 
 // login
-router.post('/login',authVerify, async(req,res)=>{
+// router.post('/login',authVerify, async(req,res)=>{
+    router.post('/login', async(req,res)=>{
+
     try {
         let username = req.body.username;
         let password = req.body.password;
@@ -263,13 +281,15 @@ router.post("/mailSendingEJSApi", async(req, res)=>{
             subject: subject,
             // text: text
             // html: `<h1>This is a Heading</h1><p>This is a Paragraph</p><p>Click here ${link}`
-            fileName: 'SampleEjs.ejs',
-            attachments:[
+            // fileName: 'SampleEjs.ejs',
+            fileName: 'confirmationEmail.ejs',
+
+            attachments:
                 {
-                    filename: 'sample_pdf.pdf',
-                    filePath:"/Users/platosystechnologies/Downloads/sample_pdf.pdf"                    
+                    filename:'sample.pdf',
+                    filePath:'../mailpdf/sample.pdf'               
                 }
-            ],
+            ,
             details:{
                 title: "APPLICATION FORM",
                 date: new Date(),
@@ -320,28 +340,78 @@ router.get("/VerifiedUserApi", async(req, res)=>{
     }
 })
 
-export async function mailService(mailDetails){
-        let useruuid = mailDetails.useruuid
-        let useremail = mailDetails.useremail
-        let emaiSubject = mailDetails.subject
-        console.log("email data ==>mailService",mailDetails)
-        // 192.168.1.26
-        // let link = `http://127.0.0.1:7070/api/v2/users/VerifiedUserApi?uuid=${useruuid}`
-        let link = `http://192.168.1.26:7070/api/v2/users/VerifiedUserApi?uuid=${useruuid}`
+// export async function mailService(mailDetails){
+//         let useruuid = mailDetails.useruuid
+//         let useremail = mailDetails.useremail
+//         let emaiSubject = mailDetails.subject
+//         console.log("email data ==>mailService",mailDetails)
+//         // 192.168.1.26
+//         // let link = `http://127.0.0.1:7070/api/v2/users/VerifiedUserApi?uuid=${useruuid}`
+//         let link = `http://192.168.1.26:7070/api/v2/users/VerifiedUserApi?uuid=${useruuid}`
 
-        const toMail = useremail;
-        const subject = emaiSubject;
-        const mailData = {
-            from: process.env.EMAIL,
-            to: toMail,
-            subject: subject,
-            // text: text
-            // html: `<h1>This is a Heading</h1><p>This is a Paragraph</p><p>Click here ${link}`
-            html: `<h1>This is a Heading</h1><p>This is a Paragraph</p><a href= ${link}>Click here</a><p>Thank you</p>`
+//         const toMail = useremail;
+//         const subject = emaiSubject;
+//         const mailData = {
+//             from: process.env.EMAIL,
+//             to: toMail,
+//             subject: subject,
+//             // text: text
+//             // html: `<h1>This is a Heading</h1><p>This is a Paragraph</p><p>Click here ${link}`
+//             html: `<h1>This is a Heading</h1><p>This is a Paragraph</p><a href= ${link}>Click here</a><p>Thank you</p>`
 
+//         }
+//         let data = await MailSending.mailSending(mailData)
+//         console.log("MAIL RESPONSE ",mailDetails)
+
+// }
+
+//api for mailSending
+router.post('/sendMailSendgrid',async(req,res)=>{
+    try{
+        const toMail = req.body.toMail;
+        const subject = req.body.subject;
+        const text = req.body.text;
+        const compose={
+            to:toMail,
+            from:"ramspriya280@gmail.com",
+            subject:subject,
+            fileName:'confirmationemail.ejs',
+            html: '<h1>This is Heading</h1>',
+            attachments:{
+                filename:'sample.pdf',
+                filePath:'../mailpdf/sample.pdf'
+            }
+     
         }
-        let data = await MailSending.mailSending(mailData)
-        console.log("MAIL RESPONSE ",mailDetails)
 
-}
+        // fs.readFile('index.html',{encoding:'utf-8'},function(err,html){
+
+        //     if(err){
+        //         console.log(err);
+        //     }else{
+                
+        //         composes={
+        //             from :"pinkyangelqueen123@gmail.com",
+        //             to : toMail,
+        //             subject : subject,
+        //             html: <h1>This is Heading</h1>
+                    
+        //         };
+                
+        //     }
+        // });
+
+        let mailData = await MailSending.SendGridmailSending(compose)
+        console.log("compose:...",compose)
+       //if(mailData===1){
+         return res.status(200).json({status:'success',message:"mail sent successfully"})
+       //}//
+    //    }else{
+    //        return res.status(400).json({status:'Failure',message:'mail not sent'})
+    //    }
+    }catch(error){
+        console.log(error.message);
+       // return res.status(500).json({status:'success',message:error.message})
+    }
+})
 module.exports = router;
