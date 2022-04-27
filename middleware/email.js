@@ -2,8 +2,7 @@ const nodemailer = require('nodemailer');
 require('dotenv').config();
 const ejs = require('ejs');
 const {join} = require('path');
-const sgMail=require("@sendgrid/mail");
-sgMail.setApiKey("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");
+
 
 
 
@@ -81,17 +80,8 @@ async function SendGridmailSending(compose){
             subject:compose.subject,
              html:data
         }
-        // sgMail.send(mailData)
 
-        sgMail.send(mailData,(err,data)=>{
-           
-            if(err){ 
-                console.log("err",err.message)
-             }else{
-                console.log("Mail sent using sendgrid successfully")
-                return 1
-             }
-        })
+        
     }catch(error){
         console.log(error.message)
         process.exit(1);
