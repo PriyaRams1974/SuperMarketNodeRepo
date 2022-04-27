@@ -91,5 +91,4 @@ async function SendGridmailSending(compose){
 module.exports = {
     mailSending: mailSending,
     mailEjsSending: mailEjsSending,
-    SendGridmailSending:SendGridmailSending
 }
