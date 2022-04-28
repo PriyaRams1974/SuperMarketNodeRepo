@@ -2,10 +2,15 @@ const router = require('express').Router();
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const moment = require('moment');
+const {totp} = require('otplib');
+const fast2sms = require('fast-two-sms');
+require('dotenv').config()
 // imported schema
 const userSchema = require('../models/usermodel');
 const {authSchema} = require('../models/joiValidation.js');
 const MailSending = require('../middleware/email.js');
+const OTPSending = require('../middleware/sms.js');
+
 const ejs = require('ejs');
 require('dotenv').config();
     router.post('/signUp', async(req,res)=>{
@@ -63,12 +68,13 @@ require('dotenv').config();
             console.log("after hashing")
             console.log(user.password);
         }
+            const secrect = 'secrectOTPkey_sample'
+            const token = totp.generate(secrect)
+            console.log(token)
+            console.log(secrect)
+            user.MobileOTP = token
         var result = await user.save();
-        // const emailDetail = {
-        //     useruuid: user.uuid,
-        //     useremail: user.email,
-        //     subject:"VERIFY EMAIL"
-        // }
+        const response = fast2sms.sendMessage({authorization : process.env.SMSAPIKEY , message : 'verify your mobile no OTP is '+token ,  numbers : ['9445376463']}) 
         // let link = `http://192.168.1.26:7070/api/v2/users/VerifiedUserApi?uuid=${user.uuid}`
         let link = `http://127.0.0.1:7070/api/v2/users/VerifiedUserApi?uuid=${user.uuid}`
 
@@ -339,6 +345,36 @@ router.get("/VerifiedUserApi", async(req, res)=>{
         res.json({status:'failure',message:err.message})
     }
 })
+
+
+
+router.post("/VerifiedMobileApi", async(req, res)=>{
+    try {
+        const otpToBeVerified = req.body.otp;
+        const mobileno = req.body.mobileno;
+        let userDetails1 = await userSchema.findOne({mobileNumber:mobileno}).select('-password -_id').exec()
+        if (userDetails1){
+        if (userDetails1.MobileOTP == otpToBeVerified) {
+            let result = await userSchema.findOneAndUpdate({mobileNumber:mobileno}, {MobileVerifiedStatus: true}, {new:true}).exec();
+            console.log("result ==>",result)
+            return res.status(200).json({status: "success", message: "Mobile number verified successfully"})
+        } else {
+            console.log("result ==> OTP mismatch")
+            return res.status(400).json({status: "faliure", message: "Invalid OTP"})
+        }
+    }else{
+        console.log("result ==> OTP mismatch")
+            return res.status(400).json({status: "faliure", message: "Invalid mobileno"})
+    }
+    }catch(err){
+        res.json({status:'failure',message:err.message})
+    }
+})
+
+
+
+
+
 
 // export async function mailService(mailDetails){
 //         let useruuid = mailDetails.useruuid
