@@ -371,6 +371,34 @@ router.post("/VerifiedMobileApi", async(req, res)=>{
     }
 })
 
+//api for mailSending
+router.post('/sendMailSendgrid',async(req,res)=>
+{ 
+    try{ 
+        const toMail = req.body.toMail; 
+        const subject = req.body.subject; 
+        const text = req.body.text; 
+        const compose={ to:toMail, 
+            from:process.env.SENDGRIDEMAIL, 
+            subject:subject, 
+            fileName:'confirmationemail.ejs', 
+            html: '<h1>This is Heading</h1>', 
+            attachments:{ filename:'sample.pdf', 
+            filePath:'../mailpdf/sample.pdf' } 
+        }
+        let mailData = await MailSending.SendGridmailSending(compose)
+        console.log("compose:...",compose)
+       //if(mailData===1){
+         return res.status(200).json({status:'success',message:"mail sent successfully"})
+       //}//
+    //    }else{
+    //        return res.status(400).json({status:'Failure',message:'mail not sent'})
+    //    }
+    }catch(error){
+        console.log(error.message);
+       // return res.status(500).json({status:'success',message:error.message})
+    }
+})
 
 
 
