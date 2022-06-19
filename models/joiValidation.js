@@ -1,6 +1,6 @@
 // Joi schema Validations
 const joi=require('joi')
-const { schema } = require('./usermodel')
+const schema  = require('./usermodel')
 
 const authSchema=joi.object({
     username: joi.string().alphanum().pattern(new RegExp('.*[0-9].*')).required(),
